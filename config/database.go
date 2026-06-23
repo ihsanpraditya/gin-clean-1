@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// "my-api-boilerplate/models"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -27,12 +25,6 @@ func ConnectDatabase() {
 		panic("Failed to connect to database: " + err.Error())
 	}
 	log.Println("Connected to database.")
-
-	// Auto-migrate our model structure
-	// err = database.AutoMigrate(&models.User{})
-	// if err != nil {
-	// 	panic("Database migration failed: " + err.Error())
-	// }
 
 	DB = database
 }

@@ -1,12 +1,13 @@
 package main
+package main
 
 import (
 	"my-api-boilerplate/config"
 	"my-api-boilerplate/routes"
+	"os"
 )
 
 func main() {
-	// Initialize database
 	config.ConnectDatabase()
 
 	// Setup routes
