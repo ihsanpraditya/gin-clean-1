@@ -1,8 +1,8 @@
 MIGRATION_PATH=./db/migrations
-DB_URL=postgres://user:pass@localhost:5432/dbname?sslmode=disable
+DB_URL=postgres://postgres:pass@localhost:5432/my_app_db?sslmode=disable
 
 migration-create:
-	migrate create -ext sql -dir $(MIGRATION_PATH) -seq $(name)
+	migrate create -ext sql -dir $(MIGRATION_PATH) $(name)
 
 migration-up:
 	migrate -path $(MIGRATION_PATH) -database "$(DB_URL)" up

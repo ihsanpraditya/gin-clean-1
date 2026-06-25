@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"net/http"
 	"errors"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/database"
+	"net/http"
+	"strconv"
+
 	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/model"
 	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/service"
 
@@ -16,6 +17,11 @@ type RegisterRequest struct {
 	Password string `json:"password" binding:"required,min=6"`
 }
 
+type UpdateUserRequest struct {
+	Name  string `json:"name" binding:"required,min=2,max=100"`
+	Email string `json:"email" binding:"required,email"`
+}
+
 type UserResponse struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
@@ -26,17 +32,15 @@ type UserHandler struct {
 	svc *service.UserService
 }
 
-func NewUserHandler(svc *service.UserService) *UserHandler {
-	return &UserHandler{svc: svc}
+func NewUserHandler(s *service.UserService) *UserHandler {
+	return &UserHandler{svc: s}
 }
 
-// Register handles user signups securely
+// Register menangani pendaftaran user baru secara aman
 func (h *UserHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 
-	// 1. Validate payload structure and inputs
 	if err := c.ShouldBindJSON(&req); err != nil {
-		// You can customize this further via your internal/handler/validator.go
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Validation failed",
 			"details": err.Error(),
@@ -44,29 +48,24 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// 2. Map DTO to business domain model safely
 	userModel := &model.User{
 		Name:     req.Name,
 		Email:    req.Email,
-		Password: req.Password, // Password hashing should happen downstream in service layer!
+		Password: req.Password,
 	}
 
-	// 3. Execute business tier
 	ctx := c.Request.Context()
 	if err := h.svc.RegisterUser(ctx, userModel); err != nil {
-		// 4. Inspect semantic domain errors gracefully
 		if errors.Is(err, service.ErrEmailTaken) {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
-
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
 		return
 	}
 
-	// 5. Build clean, safe response payload (Zero exposure of Password hash)
 	resp := UserResponse{
-		ID:    userModel.ID, // Filled out automatically by GORM after successful creation
+		ID:    userModel.ID,
 		Name:  userModel.Name,
 		Email: userModel.Email,
 	}
@@ -77,49 +76,116 @@ func (h *UserHandler) Register(c *gin.Context) {
 	})
 }
 
-// GET /users
-func GetUsers(c *gin.Context) {
-	var users []model.User
-	database.DB.Find(&users)
-	c.JSON(http.StatusOK, users)
+// GetUsers mengambil semua data user
+func (h *UserHandler) GetUsers(c *gin.Context) {
+	ctx := c.Request.Context()
+	users, err := h.svc.GetAllUsers(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
+
+	var resp []UserResponse
+	for _, u := range users {
+		resp = append(resp, UserResponse{
+			ID:    u.ID,
+			Name:  u.Name,
+			Email: u.Email,
+		})
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
-// GET /users/:id
-func GetUser(c *gin.Context) {
-	var user model.User
-	if err := database.DB.First(&user, c.Param("id")).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+// GetUser mengambil data satu user berdasarkan ID
+func (h *UserHandler) GetUser(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+
+	ctx := c.Request.Context()
+	user, err := h.svc.GetUserByID(ctx, uint(id))
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
+
+	resp := UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
-// PUT /users/:id
-func UpdateUser(c *gin.Context) {
-	var user model.User
-	if err := database.DB.First(&user, c.Param("id")).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+// UpdateUser memperbarui data user berdasarkan ID
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
-	var input model.User
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Validation failed",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	database.DB.Model(&user).Updates(input)
-	c.JSON(http.StatusOK, user)
+	ctx := c.Request.Context()
+	user, err := h.svc.UpdateUser(ctx, uint(id), req.Name, req.Email)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		if errors.Is(err, service.ErrEmailTaken) {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
+
+	resp := UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User updated successfully",
+		"data":    resp,
+	})
 }
 
-// DELETE /users/:id
-func DeleteUser(c *gin.Context) {
-	var user model.User
-	if err := database.DB.First(&user, c.Param("id")).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+// DeleteUser menghapus user berdasarkan ID
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
-	database.DB.Delete(&user)
+	ctx := c.Request.Context()
+	if err := h.svc.DeleteUser(ctx, uint(id)); err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }

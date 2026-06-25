@@ -2,6 +2,8 @@ package handler
 
 import (
     "github.com/go-playground/validator/v10"
+    "fmt"
+    "strings"
 )
 
 // ValidationError represents a single field error
