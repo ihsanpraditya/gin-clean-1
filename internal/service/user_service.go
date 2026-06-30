@@ -3,44 +3,35 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/model"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/repository"
-	"gorm.io/gorm"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/ihsanpraditya/gin-clean-1/internal/model"
+	"github.com/ihsanpraditya/gin-clean-1/internal/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	ErrEmailTaken    = errors.New("email already taken")
-	ErrUserNotFound  = errors.New("user not found")
+	ErrEmailTaken         = errors.New("email already taken")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
 type UserService struct {
 	repo *repository.UserRepository
+	// JWT Secret Key (Idealnya ditaruh di internal/config)
+	jwtSecret []byte
 }
 
 func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{repo: repo}
-}
-
-func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
-	user, err := s.repo.FindByEmail(ctx, email)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
-		}
-		return nil, err
+	return &UserService{
+		repo:      repo,
+		jwtSecret: []byte("super_secret_jwt_key_change_me"),
 	}
-	return user, nil
 }
 
 func (s *UserService) GetUserByID(ctx context.Context, id uint) (*model.User, error) {
-	user, err := s.repo.FindByID(ctx, id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
-		}
-		return nil, err
-	}
-	return user, nil
+	return s.repo.FindByID(ctx, id)
 }
 
 func (s *UserService) RegisterUser(ctx context.Context, user *model.User) error {
@@ -49,51 +40,61 @@ func (s *UserService) RegisterUser(ctx context.Context, user *model.User) error 
 		return ErrEmailTaken
 	}
 
-	// TODO: Lakukan hashing password di sini sebelum disimpan ke repo
-	// user.Password = hashPassword(user.Password)
+	// Hash password sebelum disimpan ke repository
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
 
 	return s.repo.Create(ctx, user)
+}
+
+// Login memvalidasi kredensial dan mengembalikan JWT token jika sukses
+func (s *UserService) Login(ctx context.Context, email, password string) (string, error) {
+	user, err := s.repo.FindByEmail(ctx, email)
+	if err != nil {
+		return "", ErrInvalidCredentials
+	}
+
+	// Bandingkan password plain text dari request dengan hash dari DB
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return "", ErrInvalidCredentials
+	}
+
+	// Membuat klaim token JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(time.Hour * 72).Unix(), // Token kedaluwarsa dalam 3 hari
+	})
+
+	// Menandatangani token menggunakan secret key
+	tokenString, err := token.SignedString(s.jwtSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	return s.repo.FindAll(ctx)
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, id uint, name string, email string) (*model.User, error) {
+func (s *UserService) UpdateUser(ctx context.Context, id uint, name, email string) (*model.User, error) {
 	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
-		}
-		return nil, err
+		return nil, ErrUserNotFound
 	}
-
-	// Validasi jika email baru ternyata sudah digunakan oleh user lain
-	if email != user.Email {
-		existing, _ := s.repo.FindByEmail(ctx, email)
-		if existing != nil {
-			return nil, ErrEmailTaken
-		}
-	}
-
 	user.Name = name
 	user.Email = email
-
 	if err := s.repo.Update(ctx, user); err != nil {
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
-	_, err := s.repo.FindByID(ctx, id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrUserNotFound
-		}
-		return err
-	}
-
 	return s.repo.Delete(ctx, id)
 }

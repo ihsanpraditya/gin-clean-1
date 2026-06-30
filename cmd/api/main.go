@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/config"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/database"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/router"
+	"github.com/ihsanpraditya/gin-clean-1/internal/config"
+	"github.com/ihsanpraditya/gin-clean-1/internal/database"
+	"github.com/ihsanpraditya/gin-clean-1/internal/router"
 )
 
 func main() {

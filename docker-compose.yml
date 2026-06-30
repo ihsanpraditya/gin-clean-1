@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: gin-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
       - db
 
   db:
+    container_name: gin-db
     image: postgres:16-alpine
     environment:
       - POSTGRES_USER=postgres

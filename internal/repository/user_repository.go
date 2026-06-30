@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/model"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/query"
+	"github.com/ihsanpraditya/gin-clean-1/internal/model"
+	"github.com/ihsanpraditya/gin-clean-1/internal/query"
 
 	"gorm.io/gorm"
 )

@@ -6,7 +6,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"github.com/ihsanpraditya/docker-golang-postgres-api-boilerplate/internal/config"
+	"github.com/ihsanpraditya/gin-clean-1/internal/config"
 )
 
 var DB *gorm.DB
