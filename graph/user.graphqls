@@ -1,0 +1,20 @@
+extend type Query {
+  users: [User!]!
+  user(id: ID!): User
+}
+
+extend type Mutation {
+  updateUser(id: ID!, input: UpdateUserInput!): User! @isAuthenticated
+  deleteUser(id: ID!): String! @isAuthenticated
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+input UpdateUserInput {
+  name: String!
+  email: String!
+}

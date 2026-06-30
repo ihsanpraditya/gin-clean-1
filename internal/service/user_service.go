@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ihsanpraditya/gin-clean-1/internal/model"
@@ -26,7 +27,7 @@ type UserService struct {
 func NewUserService(repo *repository.UserRepository) *UserService {
 	return &UserService{
 		repo:      repo,
-		jwtSecret: []byte("super_secret_jwt_key_change_me"),
+		jwtSecret: []byte(os.Getenv("JWT_KEY")),
 	}
 }
 
@@ -51,16 +52,16 @@ func (s *UserService) RegisterUser(ctx context.Context, user *model.User) error 
 }
 
 // Login memvalidasi kredensial dan mengembalikan JWT token jika sukses
-func (s *UserService) Login(ctx context.Context, email, password string) (string, error) {
+func (s *UserService) Login(ctx context.Context, email, password string) (string, *model.User, error) {
 	user, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
-		return "", ErrInvalidCredentials
+		return "", nil, ErrInvalidCredentials
 	}
 
 	// Bandingkan password plain text dari request dengan hash dari DB
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", ErrInvalidCredentials
+		return "", nil, ErrInvalidCredentials
 	}
 
 	// Membuat klaim token JWT
@@ -72,10 +73,10 @@ func (s *UserService) Login(ctx context.Context, email, password string) (string
 	// Menandatangani token menggunakan secret key
 	tokenString, err := token.SignedString(s.jwtSecret)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return tokenString, nil
+	return tokenString, user, nil
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {

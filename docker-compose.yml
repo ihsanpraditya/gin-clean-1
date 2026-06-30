@@ -1,5 +1,7 @@
 services:
   api:
+    env_file:
+      - .env
     container_name: gin-api
     build:
       context: .
@@ -12,11 +14,12 @@ services:
       - /go/pkg/mod/
     command: sh -c "go mod tidy && air"
     environment:
-      - DB_HOST=db
-      - DB_USER=postgres
-      - DB_PASSWORD=pass
-      - DB_NAME=my_app_db
-      - DB_PORT=5432
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_KEY=${JWT_KEY}
     depends_on:
       - db
 
