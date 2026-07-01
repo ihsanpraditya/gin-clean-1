@@ -5,13 +5,19 @@ extend type Query {
 
 extend type Mutation {
   updateUser(id: ID!, input: UpdateUserInput!): User! @isAuthenticated
-  deleteUser(id: ID!): String! @isAuthenticated
+  deleteUser(id: ID!): String! @can(resource: "user", action: "delete")
+}
+
+type Role {
+  id: ID!
+  name: String!
 }
 
 type User {
   id: ID!
   name: String!
   email: String!
+  roles: [Role!]!
 }
 
 input UpdateUserInput {

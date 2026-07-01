@@ -1,0 +1,4 @@
+p, super_admin, *, *
+p, admin, users, *
+p, user, users, read
+p, user, users, update

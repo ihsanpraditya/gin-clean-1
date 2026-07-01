@@ -76,11 +76,22 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model1.User, erro
 }
 
 // ID is the resolver for the id field.
+func (r *roleResolver) ID(ctx context.Context, obj *model1.Role) (string, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+
+// ID is the resolver for the id field.
 func (r *userResolver) ID(ctx context.Context, obj *model1.User) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
+// Role returns RoleResolver implementation.
+func (r *Resolver) Role() RoleResolver { return &roleResolver{r} }
+
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
-type userResolver struct{ *Resolver }
+type (
+	roleResolver struct{ *Resolver }
+	userResolver struct{ *Resolver }
+)

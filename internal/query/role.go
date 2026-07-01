@@ -3,24 +3,17 @@
 package query
 
 import (
-	"github.com/ihsanpraditya/gin-clean-1/internal/model"
 	"gorm.io/cli/gorm/field"
 )
 
-var User = struct {
+var Role = struct {
 	ID        field.Number[uint]
 	Name      field.String
-	Email     field.String
-	Password  field.String
-	Roles     field.Slice[model.Role]
 	CreatedAt field.Time
 	UpdatedAt field.Time
 }{
 	ID:        field.Number[uint]{}.WithColumn("id"),
 	Name:      field.String{}.WithColumn("name"),
-	Email:     field.String{}.WithColumn("email"),
-	Password:  field.String{}.WithColumn("password"),
-	Roles:     field.Slice[model.Role]{}.WithName("Roles"),
 	CreatedAt: field.Time{}.WithColumn("created_at"),
 	UpdatedAt: field.Time{}.WithColumn("updated_at"),
 }

@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"os"
 	"errors"
+	"fmt"
 
+	"github.com/casbin/casbin/v3"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -21,20 +23,53 @@ func SetupRouter(r *gin.Engine) {
 	userRepo := repository.NewUserRepository(database.DB)
 	userSvc := service.NewUserService(userRepo)
 
+	// Initialize Casbin Enforcer using the config files
+		enforcer, err := casbin.NewEnforcer("model.conf", "policy.csv")
+		if err != nil {
+			panic(fmt.Sprintf("failed to create casbin enforcer: %v", err))
+		}
+
 	config := graph.Config{
 		Resolvers: &graph.Resolver{
 			UserSvc: userSvc,
 		},
 	}
 
+	// Protect using GraphQL Directives + Casbin
 	config.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
-		// Ambil value dari context yang di-inject oleh Gin AuthMiddleware sebelumnya
 		_, ok := ctx.Value(middleware.UserContextKey).(uint)
 		if !ok {
-			return nil, errors.New("access denied: unauthorized")
+			return nil, errors.New("unauthorized: please login")
 		}
 
-		// Jika lolos cek, lanjutkan eksekusi ke resolver asli
+		return next(ctx)
+	}
+
+	// Setup new directive for authorization
+	config.Directives.Can = func(ctx context.Context, obj interface{}, next graphql.Resolver, resource string, action string) (interface{}, error) {
+		userID, ok := ctx.Value(middleware.UserContextKey).(uint)
+		if !ok {
+			return nil, errors.New("unauthorized: please login")
+		}
+
+		user, err := userSvc.GetUserByID(ctx, userID)
+		if err != nil {
+			return nil, errors.New("unauthorized: user record not found")
+		}
+
+		allowed := false
+		for _, role := range user.Roles {
+			ok, err := enforcer.Enforce(role.Name, resource, action)
+			if err == nil && ok {
+				allowed = true
+				break
+			}
+		}
+
+		if !allowed {
+			return nil, fmt.Errorf("forbidden: you do not have permission to perform '%s' on '%s'", action, resource)
+		}
+
 		return next(ctx)
 	}
 

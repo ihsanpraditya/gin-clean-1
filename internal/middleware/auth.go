@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"context"
 	"strings"
 	"github.com/gin-gonic/gin"
@@ -15,14 +14,12 @@ func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			log.Println("No Authorization header found")
 			c.Next()
 			return
 		}
 
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) != 2 || strings.ToLower(bearerToken[0]) != "bearer" {
-			log.Println("Invalid Authorization header format")
 			c.Next()
 			return
 		}
@@ -33,7 +30,6 @@ func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			log.Println(err)
 			c.Next()
 			return
 		}
@@ -41,7 +37,6 @@ func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok && token.Valid {
 			userID := uint(claims["user_id"].(float64))
-			log.Println("Authenticated user ID:", userID)
 			// Crucial: Pass the user ID down into Go's standard context object
 			ctx := context.WithValue(c.Request.Context(), UserContextKey, userID)
 			c.Request = c.Request.WithContext(ctx)

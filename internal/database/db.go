@@ -27,4 +27,6 @@ func ConnectDatabase(cfg config.DatabaseConfig) {
 
 	log.Println("Connected to database.")
 	DB = database
+
+	Seed(DB)
 }

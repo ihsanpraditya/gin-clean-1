@@ -33,6 +33,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.
 func (r *UserRepository) FindByID(ctx context.Context, id uint) (*model.User, error) {
 	var user model.User
 	err := r.db.WithContext(ctx).
+		Preload("Roles").
 		Where(query.User.ID.Eq(id)).
 		Take(&user).Error
 
@@ -51,6 +52,7 @@ func (r *UserRepository) Create(ctx context.Context, user *model.User) error {
 func (r *UserRepository) FindAll(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	err := r.db.WithContext(ctx).
+		Preload("Roles").
 		Order(query.User.ID.Asc()).
 		Find(&users).Error
 

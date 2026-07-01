@@ -13,5 +13,8 @@ migration-up:
 migration-down:
 	migrate -path $(MIGRATION_PATH) -database "$(DB_URL)" down
 
-generate:
+generate-api:
 	$(GO) run github.com/99designs/gqlgen generate
+
+generate-query:
+	gorm gen -i ./internal/model/ -o ./internal/query/
