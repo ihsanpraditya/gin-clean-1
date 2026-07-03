@@ -6,3 +6,13 @@ Boilerplate yang masih belum rapih untuk Gin [GraphQL](https://graphql.org/) den
 3. [golang-migrate](https://github.com/golang-migrate/migrate)
 4. [PostgreSQL](https://www.postgresql.org/)
 5. Layered Architecture (handler, service, repository)
+
+## Quick Start
+
+Just run `docker compose up -d` with a good internet connection.
+
+## Generating JWT Key
+
+````bash
+openssl rand -base64 32
+````
