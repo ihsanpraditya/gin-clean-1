@@ -13,6 +13,9 @@ migration-up:
 migration-down:
 	migrate -path $(MIGRATION_PATH) -database "$(DB_URL)" down
 
+migration-force:
+	migrate -path $(MIGRATION_PATH) -database "$(DB_URL)" force $(V)
+
 generate-api:
 	$(GO) run github.com/99designs/gqlgen generate
 
