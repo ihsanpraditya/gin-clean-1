@@ -24,6 +24,8 @@ type RegisterInput struct {
 }
 
 type UpdateUserInput struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name     string   `json:"name"`
+	Email    string   `json:"email"`
+	Roles    []string `json:"roles"`
+	IsActive bool     `json:"isActive"`
 }

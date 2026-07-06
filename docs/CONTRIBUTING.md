@@ -32,9 +32,9 @@
 - **scripts/**: contains scripts for various tasks, such as database migrations or code generation.
 - **test/**: contains test files and test-related utilities.
 
-## Editing GraphQL Schema
+## Adding/Editing GraphQL Schema
 
-1. Add new schema in `graphql/schema/*.graphqls` or add new file using the same format.
+1. Add/edit schema in `graphql/schema/*.graphqls`.
 2. Run: 
 ```
 go run github.com/99designs/gqlgen generate

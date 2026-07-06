@@ -83,13 +83,21 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	return s.repo.FindAll(ctx)
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, id uint, name, email string) (*model.User, error) {
+func (s *UserService) UpdateUser(ctx context.Context, id uint, name, email string, roleIDs []uint, isActive bool) (*model.User, error) {
 	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, ErrUserNotFound
 	}
 	user.Name = name
 	user.Email = email
+	user.IsActive = isActive
+
+	var roles []model.Role
+	for _, roleID := range roleIDs {
+		roles = append(roles, model.Role{ID: roleID})
+	}
+	user.Roles = roles
+
 	if err := s.repo.Update(ctx, user); err != nil {
 		return nil, err
 	}
