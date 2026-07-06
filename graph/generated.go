@@ -65,10 +65,11 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
-		Roles func(childComplexity int) int
+		Email    func(childComplexity int) int
+		ID       func(childComplexity int) int
+		IsActive func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Roles    func(childComplexity int) int
 	}
 }
 
@@ -212,6 +213,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
+	case "User.isActive":
+		if e.ComplexityRoot.User.IsActive == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.IsActive(childComplexity), true
 	case "User.name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
@@ -361,6 +368,8 @@ func (ec *executionContext) childFields_User(ctx context.Context, field graphql.
 		return ec.fieldContext_User_email(ctx, field)
 	case "roles":
 		return ec.fieldContext_User_roles(ctx, field)
+	case "isActive":
+		return ec.fieldContext_User_isActive(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 }
@@ -1227,6 +1236,29 @@ func (ec *executionContext) fieldContext_User_roles(_ context.Context, field gra
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _User_isActive(ctx context.Context, field graphql.CollectedField, obj *model1.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_isActive(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.IsActive, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_User_isActive(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2726,6 +2758,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "roles":
 			out.Values[i] = ec._User_roles(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "isActive":
+			out.Values[i] = ec._User_isActive(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

@@ -14,7 +14,6 @@ import (
 	model1 "github.com/ihsanpraditya/gin-clean-1/internal/model"
 )
 
-// UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model1.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -29,7 +28,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 	return updatedUser, nil
 }
 
-// DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (string, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -44,8 +42,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (string, e
 	return fmt.Sprintf("User with ID %s successfully deleted", id), nil
 }
 
-// Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model1.User, error) {
+	k
 	users, err := r.UserSvc.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
@@ -60,7 +58,6 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model1.User, error) {
 	return result, nil
 }
 
-// User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model1.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -75,20 +72,16 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model1.User, erro
 	return user, nil
 }
 
-// ID is the resolver for the id field.
 func (r *roleResolver) ID(ctx context.Context, obj *model1.Role) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
-// ID is the resolver for the id field.
 func (r *userResolver) ID(ctx context.Context, obj *model1.User) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
-// Role returns RoleResolver implementation.
 func (r *Resolver) Role() RoleResolver { return &roleResolver{r} }
 
-// User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 type (

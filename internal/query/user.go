@@ -13,6 +13,7 @@ var User = struct {
 	Email     field.String
 	Password  field.String
 	Roles     field.Slice[model.Role]
+	IsActive  field.Bool
 	CreatedAt field.Time
 	UpdatedAt field.Time
 }{
@@ -21,6 +22,7 @@ var User = struct {
 	Email:     field.String{}.WithColumn("email"),
 	Password:  field.String{}.WithColumn("password"),
 	Roles:     field.Slice[model.Role]{}.WithName("Roles"),
+	IsActive:  field.Bool{}.WithColumn("is_active"),
 	CreatedAt: field.Time{}.WithColumn("created_at"),
 	UpdatedAt: field.Time{}.WithColumn("updated_at"),
 }

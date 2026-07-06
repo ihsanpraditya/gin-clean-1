@@ -8,6 +8,7 @@ type User struct {
 	Email     string    `json:"email" gorm:"type:varchar(100);not null"`
 	Password  string    `json:"password" gorm:"type:varchar(255);not null"`
 	Roles	  []Role    `json:"roles" gorm:"many2many:user_roles;"`
+	IsActive  bool      `json:"is_active" gorm:"default:true"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }

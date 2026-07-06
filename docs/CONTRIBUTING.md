@@ -42,7 +42,7 @@ go run github.com/99designs/gqlgen generate
 3. Add or edit resolver in equivalent `graphql/resolver/*.resolvers.go`.
 4. Test the GraphQL API using GraphQL Playground or any other GraphQL client.
 
-## Adding New Table/Model
+## Adding/Editing Table
 
 **1. Create a new migration file**
 **2. Add new model in internal/model/ folder**
@@ -51,5 +51,5 @@ go run github.com/99designs/gqlgen generate
 gorm gen -i ./internal/model/ -o ./internal/query/
 ```
 4. Define its graphql schema in `graph/`, follow instructions above.
-5. Add new service in `internal/service/` folder.
-6. Add new repository in `internal/repository/` folder.
+5. Add/edit service in `internal/service/` folder.
+6. Add/edit repository in `internal/repository/` folder.

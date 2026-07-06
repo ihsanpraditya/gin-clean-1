@@ -18,6 +18,7 @@ type User {
   name: String!
   email: String!
   roles: [Role!]!
+  isActive: Boolean!
 }
 
 input UpdateUserInput {
