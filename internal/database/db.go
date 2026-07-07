@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,6 +28,27 @@ func ConnectDatabase(cfg config.DatabaseConfig) {
 
 	log.Println("Connected to database.")
 	DB = database
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		log.Printf("Gagal mengambil instance sql.DB: %v", err)
+	} else {
+		// Batasi maksimal proses Postgres yang boleh dibuat oleh aplikasi Gin Anda
+		// Untuk 100 user bersamaan, angka 20-25 sudah sangat aman dan efisien
+		sqlDB.SetMaxOpenConns(25)
+
+		// Jumlah koneksi standby/idle yang tetap dibiarkan hidup di pool
+		sqlDB.SetMaxIdleConns(10)
+
+		// Durasi maksimal koneksi boleh digunakan sebelum otomatis dibuat baru oleh Go
+		// Berguna untuk menghindari kebocoran memori pada koneksi yang terlalu lama
+		sqlDB.SetConnMaxLifetime(1 * time.Hour)
+		
+		// Durasi maksimal koneksi idle boleh bertahan di pool sebelum ditutup otomatis
+		sqlDB.SetConnMaxIdleTime(15 * time.Minute)
+
+		log.Println("Database connection pool configured successfully.")
+	}
 
 	Seed(DB)
 }
