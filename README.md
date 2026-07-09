@@ -52,7 +52,7 @@ mutation {
   register(input: {
     name: "Ihsan",
     email: "ihsan@example.com"
-    password: "islam123
+    password: "islam123"
   }) {
       id
       name

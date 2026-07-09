@@ -21,13 +21,17 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 		return nil, fmt.Errorf("invalid user id format")
 	}
 
-	var roleIDs []uint
-	for _, roleIDStr := range input.Roles {
-		roleIDUint, err := strconv.ParseUint(roleIDStr, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("invalid role id format: %s", roleIDStr)
+	var roleIDs *[]uint
+	if input.Roles != nil {
+		ids := make([]uint, 0, len(input.Roles))
+		for _, roleIDStr := range input.Roles {
+			roleIDUint, err := strconv.ParseUint(roleIDStr, 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("invalid role id format: %s", roleIDStr)
+			}
+			ids = append(ids, uint(roleIDUint))
 		}
-		roleIDs = append(roleIDs, uint(roleIDUint))
+		roleIDs = &ids
 	}
 
 	updatedUser, err := r.UserSvc.UpdateUser(ctx, uint(idUint), input.Name, input.Email, roleIDs, input.IsActive)

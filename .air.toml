@@ -15,6 +15,8 @@ test_include = [ "_test.go" ]
   delay = 1000 # ms
   # Stop scrolling log when errors happen
   stop_on_error = true
+  poll = true             # <--- CRITICAL: Enables polling for Docker
+  poll_interval = 500
   # Send Interrupt signal instead of Kill when reloading (graceful shutdown)
   send_interrupt = true
 
