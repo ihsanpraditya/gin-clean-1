@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/casbin/casbin/v3"
+	"github.com/go-playground/validator/v10"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -22,16 +23,18 @@ import (
 func SetupRouter(r *gin.Engine) {
 	userRepo := repository.NewUserRepository(database.DB)
 	userSvc := service.NewUserService(userRepo)
+	val := validator.New()
 
 	// Initialize Casbin Enforcer using the config files
-		enforcer, err := casbin.NewEnforcer("model.conf", "policy.csv")
-		if err != nil {
-			panic(fmt.Sprintf("failed to create casbin enforcer: %v", err))
-		}
+	enforcer, err := casbin.NewEnforcer("model.conf", "policy.csv")
+	if err != nil {
+		panic(fmt.Sprintf("failed to create casbin enforcer: %v", err))
+	}
 
 	config := graph.Config{
 		Resolvers: &graph.Resolver{
 			UserSvc: userSvc,
+			Validator: val,
 		},
 	}
 

@@ -9,18 +9,34 @@ import (
 	"context"
 
 	"github.com/ihsanpraditya/gin-clean-1/graph/model"
+	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
+	"github.com/ihsanpraditya/gin-clean-1/internal/handler"
 	model1 "github.com/ihsanpraditya/gin-clean-1/internal/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model1.User, error) {
-	newUser := &model1.User{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: input.Password, // The service will hash this automatically
+	if err := handler.ValidateRegisterInput(r.Resolver.Validator, input); err != nil {
+		// Convert to structured snake_case JSON field errors
+		formattedErrors := handler.FormatValidationErrors(err)
+
+		return nil, &gqlerror.Error{
+			Message: "Validation failed",
+			Extensions: map[string]interface{}{
+				"code":   "VALIDATION_ERROR",
+				"errors": formattedErrors, // Array of {field, message} structures
+			},
+		}
 	}
 
-	err := r.UserSvc.RegisterUser(ctx, newUser)
+	req := dto.UserRegisterDto{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	newUser, err := r.UserSvc.RegisterUser(ctx, req)
 	if err != nil {
 		return nil, err
 	}

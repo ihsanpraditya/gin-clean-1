@@ -1,5 +1,6 @@
 directive @isAuthenticated on FIELD_DEFINITION
 directive @can(resource: String!, action: String!) on FIELD_DEFINITION
+directive @goField(forceResolver: Boolean, name: String, validate: String) on INPUT_FIELD_DEFINITION
 
 type Query
 type Mutation

@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ihsanpraditya/gin-clean-1/internal/model"
+	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
 	"github.com/ihsanpraditya/gin-clean-1/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,20 +36,28 @@ func (s *UserService) GetUserByID(ctx context.Context, id uint) (*model.User, er
 	return s.repo.FindByID(ctx, id)
 }
 
-func (s *UserService) RegisterUser(ctx context.Context, user *model.User) error {
-	existing, _ := s.repo.FindByEmail(ctx, user.Email)
+func (s *UserService) RegisterUser(ctx context.Context, input dto.UserRegisterDto) (*model.User, error) {
+	existing, _ := s.repo.FindByEmail(ctx, input.Email)
 	if existing != nil {
-		return ErrEmailTaken
+		return nil, ErrEmailTaken
 	}
 
-	// Hash password sebelum disimpan ke repository
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	user.Password = string(hashedPassword)
+	
+	newUser := &model.User{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: string(hashedPassword), // The service will hash this automatically
+	}
 
-	return s.repo.Create(ctx, user)
+	if err := s.repo.Create(ctx, newUser); err != nil {
+		return nil, err
+	}
+
+	return newUser, nil
 }
 
 // Login memvalidasi kredensial dan mengembalikan JWT token jika sukses

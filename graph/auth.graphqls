@@ -4,9 +4,9 @@ type LoginResponse {
 }
 
 input RegisterInput {
-  name: String!
-  email: String!
-  password: String!
+  name: String! @goField(validate: "required,max=50")
+  email: String! @goField(validate: "required,max=100,email")
+  password: String! @goField(validate: "required,min=8,max=255,containsany=012345678")
   confirmPassword: String!
 }
 
