@@ -15,9 +15,9 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-// Register is the resolver for the register field.
-func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model1.User, error) {
-	if err := handler.ValidateRegisterInput(r.Resolver.Validator, input); err != nil {
+// dto.UserRegisterInput is bind automatically, see gqlgen.yml 
+func (r *mutationResolver) Register(ctx context.Context, input dto.UserRegisterInput) (*model1.User, error) {
+	if err := handler.ValidateRegisterInput(r.Resolver.Validator, &input); err != nil {
 		// Convert to structured snake_case JSON field errors
 		formattedErrors := handler.FormatValidationErrors(err)
 
@@ -30,13 +30,7 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 		}
 	}
 
-	req := dto.UserRegisterDto{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: input.Password,
-	}
-
-	newUser, err := r.UserSvc.RegisterUser(ctx, req)
+	newUser, err := r.UserSvc.RegisterUser(ctx, &input)
 	if err != nil {
 		return nil, err
 	}

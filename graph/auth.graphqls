@@ -3,14 +3,14 @@ type LoginResponse {
   user: User!
 }
 
-input RegisterInput {
-  name: String! @goField(validate: "required,max=50")
-  email: String! @goField(validate: "required,max=100,email")
-  password: String! @goField(validate: "required,min=8,max=255,containsany=012345678")
+input UserRegisterInput {
+  name: String!
+  email: String!
+  password: String!
   confirmPassword: String!
 }
 
 extend type Mutation {
-    register(input: RegisterInput!): User!
+    register(input: UserRegisterInput!): User!
     login(email: String!, password: String!): LoginResponse!
 }

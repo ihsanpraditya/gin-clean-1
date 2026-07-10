@@ -15,6 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/ihsanpraditya/gin-clean-1/graph/model"
+	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
 	model1 "github.com/ihsanpraditya/gin-clean-1/internal/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -39,6 +40,7 @@ type ResolverRoot interface {
 type DirectiveRoot struct {
 	Can             func(ctx context.Context, obj any, next graphql.Resolver, resource string, action string) (res any, err error)
 	IsAuthenticated func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Tag             func(ctx context.Context, obj any, next graphql.Resolver, forceTag *string, name *string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -50,7 +52,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		DeleteUser func(childComplexity int, id string) int
 		Login      func(childComplexity int, email string, password string) int
-		Register   func(childComplexity int, input model.RegisterInput) int
+		Register   func(childComplexity int, input dto.UserRegisterInput) int
 		UpdateUser func(childComplexity int, id string, input model.UpdateUserInput) int
 	}
 
@@ -78,7 +80,7 @@ type ComplexityRoot struct {
 // region    ************************** generated!.gotpl **************************
 
 type MutationResolver interface {
-	Register(ctx context.Context, input model.RegisterInput) (*model1.User, error)
+	Register(ctx context.Context, input dto.UserRegisterInput) (*model1.User, error)
 	Login(ctx context.Context, email string, password string) (*model.LoginResponse, error)
 	UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model1.User, error)
 	DeleteUser(ctx context.Context, id string) (string, error)
@@ -157,7 +159,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.Register(childComplexity, args["input"].(model.RegisterInput)), true
+		return e.ComplexityRoot.Mutation.Register(childComplexity, args["input"].(dto.UserRegisterInput)), true
 	case "Mutation.updateUser":
 		if e.ComplexityRoot.Mutation.UpdateUser == nil {
 			break
@@ -240,8 +242,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputUpdateUserInput,
+		ec.unmarshalInputUserRegisterInput,
 	)
 	first := true
 
@@ -512,6 +514,28 @@ func (ec *executionContext) dir_can_args(ctx context.Context, rawArgs map[string
 	return args, nil
 }
 
+func (ec *executionContext) dir_tag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "forceTag",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["forceTag"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["name"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -552,8 +576,8 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (model.RegisterInput, error) {
-			return ec.unmarshalNRegisterInput2githubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋgraphᚋmodelᚐRegisterInput(ctx, v)
+		func(ctx context.Context, v any) (dto.UserRegisterInput, error) {
+			return ec.unmarshalNUserRegisterInput2githubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐUserRegisterInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -737,7 +761,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().Register(ctx, fc.Args["input"].(model.RegisterInput))
+			return ec.Resolvers.Mutation().Register(ctx, fc.Args["input"].(dto.UserRegisterInput))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model1.User) graphql.Marshaler {
@@ -2284,57 +2308,6 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj any) (model.RegisterInput, error) {
-	var it model.RegisterInput
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name", "email", "password", "confirmPassword"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "email":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Email = data
-		case "password":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Password = data
-		case "confirmPassword":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("confirmPassword"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ConfirmPassword = data
-		}
-	}
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj any) (model.UpdateUserInput, error) {
 	var it model.UpdateUserInput
 	if obj == nil {
@@ -2381,6 +2354,57 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 				return it, err
 			}
 			it.IsActive = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUserRegisterInput(ctx context.Context, obj any) (dto.UserRegisterInput, error) {
+	var it dto.UserRegisterInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "email", "password", "confirmPassword"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		case "confirmPassword":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("confirmPassword"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ConfirmPassword = data
 		}
 	}
 	return it, nil
@@ -3240,11 +3264,6 @@ func (ec *executionContext) marshalNLoginResponse2ᚖgithubᚗcomᚋihsanpradity
 	return ec._LoginResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋgraphᚋmodelᚐRegisterInput(ctx context.Context, v any) (model.RegisterInput, error) {
-	res, err := ec.unmarshalInputRegisterInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalNRole2githubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋmodelᚐRole(ctx context.Context, sel ast.SelectionSet, v model1.Role) graphql.Marshaler {
 	return ec._Role(ctx, sel, &v)
 }
@@ -3314,6 +3333,11 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋihsanpradityaᚋgin�
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUserRegisterInput2githubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐUserRegisterInput(ctx context.Context, v any) (dto.UserRegisterInput, error) {
+	res, err := ec.unmarshalInputUserRegisterInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

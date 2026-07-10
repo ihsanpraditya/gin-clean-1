@@ -17,13 +17,6 @@ type Mutation struct {
 type Query struct {
 }
 
-type RegisterInput struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmPassword"`
-}
-
 type UpdateUserInput struct {
 	Name     string   `json:"name"`
 	Email    string   `json:"email"`

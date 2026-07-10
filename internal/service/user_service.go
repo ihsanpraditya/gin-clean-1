@@ -36,7 +36,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id uint) (*model.User, er
 	return s.repo.FindByID(ctx, id)
 }
 
-func (s *UserService) RegisterUser(ctx context.Context, input dto.UserRegisterDto) (*model.User, error) {
+func (s *UserService) RegisterUser(ctx context.Context, input *dto.UserRegisterInput) (*model.User, error) {
 	existing, _ := s.repo.FindByEmail(ctx, input.Email)
 	if existing != nil {
 		return nil, ErrEmailTaken

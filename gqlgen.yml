@@ -13,6 +13,7 @@ model:
 # Petakan tipe GraphQL langsung ke domain model GORM milikmu
 autobind:
   - "github.com/ihsanpraditya/gin-clean-1/internal/model"
+  - "github.com/ihsanpraditya/gin-clean-1/internal/dto"
 
 resolver:
   layout: follow-schema

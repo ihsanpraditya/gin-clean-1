@@ -26,6 +26,25 @@ func (e CustomFieldError) Error() string {
 func FormatValidationErrors(err error) []ValidationError {
 	var errorsList []ValidationError
 
+	var multiErr MultiValidationError
+	if errors.As(err, &multiErr) {
+		// Extract all struct tag errors
+		for _, e := range multiErr.ValidationErrors {
+			errorsList = append(errorsList, ValidationError{
+				Field:   toSnakeCase(e.Field()),
+				Message: getErrorMessage(e),
+			})
+		}
+		// Extract all manual cross-field errors
+		for _, e := range multiErr.CustomErrors {
+			errorsList = append(errorsList, ValidationError{
+				Field:   toSnakeCase(e.Field),
+				Message: e.Message,
+			})
+		}
+		return errorsList
+	}
+		
 	// 1. Check if it's our custom cross-field/manual validation error
 	var customErr CustomFieldError
 	if errors.As(err, &customErr) {
@@ -37,18 +56,17 @@ func FormatValidationErrors(err error) []ValidationError {
 
 	// 2. Check if it's a standard go-playground validation error slice
 	validationErrors, ok := err.(validator.ValidationErrors)
-	if !ok {
-		return []ValidationError{{Field: "unknown", Message: err.Error()}}
+	if ok {
+		for _, e := range validationErrors {
+			errorsList = append(errorsList, ValidationError{
+				Field:   toSnakeCase(e.Field()),
+				Message: getErrorMessage(e),
+			})
+		}
+		return errorsList
 	}
 
-	for _, e := range validationErrors {
-		errorsList = append(errorsList, ValidationError{
-			Field:   toSnakeCase(e.Field()),
-			Message: getErrorMessage(e),
-		})
-	}
-
-	return errorsList
+	return []ValidationError{{Field: "unknown", Message: err.Error()}}
 }
 
 // getErrorMessage returns a human-readable message for each validation tag
@@ -74,6 +92,8 @@ func getErrorMessage(e validator.FieldError) string {
 		return "Invalid phone number format (use E.164: +1234567890)"
 	case "slug":
 		return "Must be a valid URL slug (lowercase letters, numbers, hyphens)"
+	case "containsany":
+		return fmt.Sprintf("Must contains any of %s", e.Param())
 	default:
 		return fmt.Sprintf("Failed validation: %s", e.Tag())
 	}
