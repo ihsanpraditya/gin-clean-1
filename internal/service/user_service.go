@@ -31,17 +31,6 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) GetRoleByID(ctx context.Context, id uint) (dto.Role, error) {
-	role, err := s.repo.FindRoleByID(ctx, id)
-	if err != nil {
-		return dto.Role{}, err
-	}
-	return dto.Role{
-		ID:   role.ID,
-		Name: role.Name,
-	}, nil
-}
-
 func (s *UserService) GetUserByID(ctx context.Context, id uint) (dto.User, error) {
 	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
