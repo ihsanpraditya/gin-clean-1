@@ -7,7 +7,6 @@ import (
 	"github.com/ihsanpraditya/gin-clean-1/internal/model"
 	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
 	"github.com/ihsanpraditya/gin-clean-1/internal/repository"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var (

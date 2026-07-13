@@ -10,12 +10,30 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
+	"github.com/ihsanpraditya/gin-clean-1/internal/handler"
 )
 
-// CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input dto.CreateUser) (*dto.User, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	if err := handler.ValidateRegisterInput(r.Resolver.Validator, &input); err != nil {
+			formattedErrors := handler.FormatValidationErrors(err)
+
+			return nil, &gqlerror.Error{
+				Message: "Validation failed",
+				Extensions: map[string]interface{}{
+					"code":   "VALIDATION_ERROR",
+					"errors": formattedErrors, 
+				},
+			}
+		}
+
+		newUser, err := r.UserSvc.CreateUser(ctx, &input)
+		if err != nil {
+			return nil, err
+		}
+
+		return &newUser, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
@@ -48,22 +66,6 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (string, e
 	return fmt.Sprintf("User with ID %s successfully deleted", id), nil
 }
 
-// CreateRole is the resolver for the createRole field.
-func (r *mutationResolver) CreateRole(ctx context.Context, name string) (*dto.Role, error) {
-	panic(fmt.Errorf("not implemented: CreateRole - createRole"))
-}
-
-// UpdateRole is the resolver for the updateRole field.
-func (r *mutationResolver) UpdateRole(ctx context.Context, id string, name string) (*dto.Role, error) {
-	panic(fmt.Errorf("not implemented: UpdateRole - updateRole"))
-}
-
-// DeleteRole is the resolver for the deleteRole field.
-func (r *mutationResolver) DeleteRole(ctx context.Context, id string) (string, error) {
-	panic(fmt.Errorf("not implemented: DeleteRole - deleteRole"))
-}
-
-// User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*dto.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -78,7 +80,6 @@ func (r *queryResolver) User(ctx context.Context, id string) (*dto.User, error) 
 	return &user, nil
 }
 
-// Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*dto.User, error) {
 	users, err := r.UserSvc.GetAllUsers(ctx)
 	if err != nil {
@@ -94,42 +95,15 @@ func (r *queryResolver) Users(ctx context.Context) ([]*dto.User, error) {
 	return gqlUsers, nil
 }
 
-// Role is the resolver for the role field.
-func (r *queryResolver) Role(ctx context.Context, id string) (*dto.Role, error) {
-	idUint, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("invalid role id format")
-	}
-	role, err := r.UserSvc.GetRoleByID(ctx, uint(idUint))
-	if err != nil {
-		return nil, err
-	}
-
-	return &role, nil
-}
-
-// Roles is the resolver for the roles field.
-func (r *queryResolver) Roles(ctx context.Context) ([]*dto.Role, error) {
-	panic(fmt.Errorf("not implemented: Roles - roles"))
-}
-
-// ID is the resolver for the id field.
-func (r *roleResolver) ID(ctx context.Context, obj *dto.Role) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
-}
-
 // ID is the resolver for the id field.
 func (r *userResolver) ID(ctx context.Context, obj *dto.User) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // Roles is the resolver for the roles field.
 func (r *updateUserResolver) Roles(ctx context.Context, obj *dto.UpdateUser, data []string) error {
 	panic(fmt.Errorf("not implemented: Roles - roles"))
 }
-
-// Role returns RoleResolver implementation.
-func (r *Resolver) Role() RoleResolver { return &roleResolver{r} }
 
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
@@ -138,7 +112,6 @@ func (r *Resolver) User() UserResolver { return &userResolver{r} }
 func (r *Resolver) UpdateUser() UpdateUserResolver { return &updateUserResolver{r} }
 
 type (
-	roleResolver       struct{ *Resolver }
 	userResolver       struct{ *Resolver }
 	updateUserResolver struct{ *Resolver }
 )

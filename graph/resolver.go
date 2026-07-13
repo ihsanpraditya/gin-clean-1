@@ -6,6 +6,7 @@ import (
 )
 
 type Resolver struct {
+	RoleSvc *service.RoleService
 	UserSvc *service.UserService
 	Validator *validator.Validate
 }
