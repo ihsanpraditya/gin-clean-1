@@ -10,36 +10,27 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ihsanpraditya/gin-clean-1/graph/model"
-	model1 "github.com/ihsanpraditya/gin-clean-1/internal/model"
+	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
 )
 
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input dto.CreateUser) (*dto.User, error) {
+	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+}
+
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UpdateUserInput) (*model1.User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input dto.UpdateUser) (*dto.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid user id format")
 	}
 
-	var roleIDs *[]uint
-	if input.Roles != nil {
-		ids := make([]uint, 0, len(input.Roles))
-		for _, roleIDStr := range input.Roles {
-			roleIDUint, err := strconv.ParseUint(roleIDStr, 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("invalid role id format: %s", roleIDStr)
-			}
-			ids = append(ids, uint(roleIDUint))
-		}
-		roleIDs = &ids
-	}
-
-	updatedUser, err := r.UserSvc.UpdateUser(ctx, uint(idUint), input.Name, input.Email, roleIDs, input.IsActive)
+	updatedUser, err := r.UserSvc.UpdateUser(ctx, uint(idUint), input)
 	if err != nil {
 		return nil, err
 	}
 
-	return updatedUser, nil
+	return &updatedUser, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
@@ -57,24 +48,23 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (string, e
 	return fmt.Sprintf("User with ID %s successfully deleted", id), nil
 }
 
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model1.User, error) {
-	users, err := r.UserSvc.GetAllUsers(ctx)
-	if err != nil {
-		return nil, err
-	}
+// CreateRole is the resolver for the createRole field.
+func (r *mutationResolver) CreateRole(ctx context.Context, name string) (*dto.Role, error) {
+	panic(fmt.Errorf("not implemented: CreateRole - createRole"))
+}
 
-	// Convert []model.User to []*model1.User
-	var result []*model1.User
-	for i := range users {
-		result = append(result, &users[i])
-	}
+// UpdateRole is the resolver for the updateRole field.
+func (r *mutationResolver) UpdateRole(ctx context.Context, id string, name string) (*dto.Role, error) {
+	panic(fmt.Errorf("not implemented: UpdateRole - updateRole"))
+}
 
-	return result, nil
+// DeleteRole is the resolver for the deleteRole field.
+func (r *mutationResolver) DeleteRole(ctx context.Context, id string) (string, error) {
+	panic(fmt.Errorf("not implemented: DeleteRole - deleteRole"))
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model1.User, error) {
+func (r *queryResolver) User(ctx context.Context, id string) (*dto.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid user id format")
@@ -85,17 +75,57 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model1.User, erro
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
+}
+
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*dto.User, error) {
+	users, err := r.UserSvc.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert []dto.User to []*dto.User for GraphQL
+	gqlUsers := make([]*dto.User, len(users))
+	for i := range users {
+		gqlUsers[i] = &users[i]
+	}
+
+	return gqlUsers, nil
+}
+
+// Role is the resolver for the role field.
+func (r *queryResolver) Role(ctx context.Context, id string) (*dto.Role, error) {
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid role id format")
+	}
+	role, err := r.UserSvc.GetRoleByID(ctx, uint(idUint))
+	if err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
+// Roles is the resolver for the roles field.
+func (r *queryResolver) Roles(ctx context.Context) ([]*dto.Role, error) {
+	panic(fmt.Errorf("not implemented: Roles - roles"))
 }
 
 // ID is the resolver for the id field.
-func (r *roleResolver) ID(ctx context.Context, obj *model1.Role) (string, error) {
-	return strconv.FormatUint(uint64(obj.ID), 10), nil
+func (r *roleResolver) ID(ctx context.Context, obj *dto.Role) (string, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
 }
 
 // ID is the resolver for the id field.
-func (r *userResolver) ID(ctx context.Context, obj *model1.User) (string, error) {
-	return strconv.FormatUint(uint64(obj.ID), 10), nil
+func (r *userResolver) ID(ctx context.Context, obj *dto.User) (string, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+
+// Roles is the resolver for the roles field.
+func (r *updateUserResolver) Roles(ctx context.Context, obj *dto.UpdateUser, data []string) error {
+	panic(fmt.Errorf("not implemented: Roles - roles"))
 }
 
 // Role returns RoleResolver implementation.
@@ -104,7 +134,11 @@ func (r *Resolver) Role() RoleResolver { return &roleResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+// UpdateUser returns UpdateUserResolver implementation.
+func (r *Resolver) UpdateUser() UpdateUserResolver { return &updateUserResolver{r} }
+
 type (
-	roleResolver struct{ *Resolver }
-	userResolver struct{ *Resolver }
+	roleResolver       struct{ *Resolver }
+	userResolver       struct{ *Resolver }
+	updateUserResolver struct{ *Resolver }
 )

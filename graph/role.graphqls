@@ -1,0 +1,15 @@
+extend type Query {
+  role(id: ID!): Role
+  roles: [Role!]!
+}
+
+extend type Mutation {
+  createRole(name: String!): Role! # @can(resource: "role", action: "create")
+  updateRole(id: ID!, name: String!): Role! # @can(resource: "role", action: "update")
+  deleteRole(id: ID!): String! # @can(resource: "role", action: "delete")
+}
+
+type Role {
+  id: ID!
+  name: String!
+}

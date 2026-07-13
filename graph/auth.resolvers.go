@@ -8,44 +8,17 @@ package graph
 import (
 	"context"
 
-	"github.com/ihsanpraditya/gin-clean-1/graph/model"
 	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
-	"github.com/ihsanpraditya/gin-clean-1/internal/handler"
-	model1 "github.com/ihsanpraditya/gin-clean-1/internal/model"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-// dto.UserRegisterInput is bind automatically, see gqlgen.yml 
-func (r *mutationResolver) Register(ctx context.Context, input dto.UserRegisterInput) (*model1.User, error) {
-	if err := handler.ValidateRegisterInput(r.Resolver.Validator, &input); err != nil {
-		// Convert to structured snake_case JSON field errors
-		formattedErrors := handler.FormatValidationErrors(err)
-
-		return nil, &gqlerror.Error{
-			Message: "Validation failed",
-			Extensions: map[string]interface{}{
-				"code":   "VALIDATION_ERROR",
-				"errors": formattedErrors, // Array of {field, message} structures
-			},
-		}
-	}
-
-	newUser, err := r.UserSvc.RegisterUser(ctx, &input)
-	if err != nil {
-		return nil, err
-	}
-
-	return newUser, nil
-}
-
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.LoginResponse, error) {
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*dto.LoginResponse, error) {
 	token, user, err := r.UserSvc.Login(ctx, email, password)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.LoginResponse{
+	return &dto.LoginResponse{
 		Token: token,
 		User:  user,
 	}, nil

@@ -62,9 +62,8 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]model.User, error) {
 	return users, nil
 }
 
-// Update memperbarui data user
-func (r *UserRepository) Update(ctx context.Context, user *model.User) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+func (r *UserRepository) Update(ctx context.Context, user *model.User) (*model.User, error) {
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(user).Error; err != nil {
 			return err
 		}
@@ -72,9 +71,15 @@ func (r *UserRepository) Update(ctx context.Context, user *model.User) error {
 		if err := tx.Model(user).Association("Roles").Replace(user.Roles); err != nil {
 			return err
 		}
+
+		if err := tx.Preload("Roles").First(user, user.ID).Error; err != nil {
+			return err
+		}
 		
 		return nil
 	})
+
+	return user, err
 }
 
 // Delete menghapus data user berdasarkan ID

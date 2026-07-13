@@ -2,24 +2,8 @@
 
 package model
 
-import (
-	"github.com/ihsanpraditya/gin-clean-1/internal/model"
-)
-
-type LoginResponse struct {
-	Token string      `json:"token"`
-	User  *model.User `json:"user"`
-}
-
 type Mutation struct {
 }
 
 type Query struct {
-}
-
-type UpdateUserInput struct {
-	Name     string   `json:"name"`
-	Email    string   `json:"email"`
-	Roles    []string `json:"roles"`
-	IsActive bool     `json:"isActive"`
 }

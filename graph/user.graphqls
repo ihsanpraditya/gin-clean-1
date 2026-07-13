@@ -1,18 +1,13 @@
 extend type Query {
-  users: [User!]!
   user(id: ID!): User
+  users: [User!]!
 }
-
 
 # NOTE: The following mutations are commented out because they require authentication and authorization directives that are not implemented in this schema. Uncomment them when you have the necessary authentication and authorization logic in place.
 extend type Mutation {
-  updateUser(id: ID!, input: UpdateUserInput!): User! # @isAuthenticated
+  createUser(input: CreateUser!): User! # @can(resource: "user", action: "create")
+  updateUser(id: ID!, input: UpdateUser!): User! # @can(resource: "user", action: "update")
   deleteUser(id: ID!): String! # @can(resource: "user", action: "delete")
-}
-
-type Role {
-  id: ID!
-  name: String!
 }
 
 type User {
@@ -23,9 +18,18 @@ type User {
   isActive: Boolean!
 }
 
-input UpdateUserInput {
+input CreateUser {
   name: String!
   email: String!
+  password: String!
+  confirmPassword: String!
+}
+
+input UpdateUser {
+  name: String!
+  email: String!
+  password: String
+  confirmPassword: String
   roles: [ID!]!
   isActive: Boolean!
 }

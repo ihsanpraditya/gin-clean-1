@@ -1,9 +1,5 @@
 directive @isAuthenticated on FIELD_DEFINITION
 directive @can(resource: String!, action: String!) on FIELD_DEFINITION
-directive @tag(
-  forceTag: String
-  name: String
-) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query
 type Mutation

@@ -3,14 +3,6 @@ type LoginResponse {
   user: User!
 }
 
-input UserRegisterInput {
-  name: String!
-  email: String!
-  password: String!
-  confirmPassword: String!
-}
-
 extend type Mutation {
-    register(input: UserRegisterInput!): User!
-    login(email: String!, password: String!): LoginResponse!
+  login(email: String!, password: String!): LoginResponse!
 }
