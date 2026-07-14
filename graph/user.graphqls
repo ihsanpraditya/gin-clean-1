@@ -23,6 +23,8 @@ input CreateUser {
   email: String!
   password: String!
   confirmPassword: String!
+  roles: [ID!]!
+  isActive: Boolean!
 }
 
 input UpdateUser {

@@ -54,6 +54,12 @@ func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUser) (dt
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: string(hashedPassword),
+		IsActive: input.IsActive,
+	}
+	
+	newUser.Roles = make([]model.Role, len(*input.Roles))
+	for i, roleID := range *input.Roles {
+		newUser.Roles[i] = model.Role{ID: roleID}
 	}
 
 	if err := s.repo.Create(ctx, newUser); err != nil {

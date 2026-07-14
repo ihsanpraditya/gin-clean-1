@@ -14,7 +14,7 @@ func (m MultiValidationError) Error() string {
 	return "multiple validation errors occurred"
 }
 
-func ValidateRegisterInput(validate *validator.Validate, input *dto.UserRegisterInput) error {
+func ValidateRegisterInput(validate *validator.Validate, input *dto.CreateUser) error {
 	var multiErr MultiValidationError
 	
 	if err := validate.Struct(input); err != nil {

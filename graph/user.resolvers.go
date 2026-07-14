@@ -10,30 +10,31 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
 	"github.com/ihsanpraditya/gin-clean-1/internal/handler"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input dto.CreateUser) (*dto.User, error) {
 	if err := handler.ValidateRegisterInput(r.Resolver.Validator, &input); err != nil {
-			formattedErrors := handler.FormatValidationErrors(err)
+		formattedErrors := handler.FormatValidationErrors(err)
 
-			return nil, &gqlerror.Error{
-				Message: "Validation failed",
-				Extensions: map[string]interface{}{
-					"code":   "VALIDATION_ERROR",
-					"errors": formattedErrors, 
-				},
-			}
+		return nil, &gqlerror.Error{
+			Message: "Validation failed",
+			Extensions: map[string]interface{}{
+				"code":   "VALIDATION_ERROR",
+				"errors": formattedErrors,
+			},
 		}
+	}
 
-		newUser, err := r.UserSvc.CreateUser(ctx, &input)
-		if err != nil {
-			return nil, err
-		}
+	newUser, err := r.UserSvc.CreateUser(ctx, &input)
+	if err != nil {
+		return nil, err
+	}
 
-		return &newUser, nil
+	return &newUser, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
@@ -66,6 +67,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (string, e
 	return fmt.Sprintf("User with ID %s successfully deleted", id), nil
 }
 
+// User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*dto.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -80,6 +82,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*dto.User, error) 
 	return &user, nil
 }
 
+// Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*dto.User, error) {
 	users, err := r.UserSvc.GetAllUsers(ctx)
 	if err != nil {
@@ -102,7 +105,14 @@ func (r *userResolver) ID(ctx context.Context, obj *dto.User) (string, error) {
 
 // Roles is the resolver for the roles field.
 func (r *updateUserResolver) Roles(ctx context.Context, obj *dto.UpdateUser, data []string) error {
-	panic(fmt.Errorf("not implemented: Roles - roles"))
+	if obj == nil || obj.Roles == nil {
+		return nil 
+	}
+	
+	for _, roleID := range *obj.Roles {
+		strconv.FormatUint(uint64(roleID), 10)
+	}
+	return  nil
 }
 
 // User returns UserResolver implementation.

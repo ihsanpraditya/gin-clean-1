@@ -18,6 +18,8 @@ type CreateUser struct {
 	Email           string `json:"email" validate:"required,max=100,email"`
 	Password        string `json:"password" validate:"required,min=8,max=255,containsany=012345678"`
 	ConfirmPassword string `json:"confirm_password"`
+	Roles 			*[]uint `json:"roles" validate:"required"`
+	IsActive 		bool `json:"is_active" validate:"required"`
 }
 
 type UpdateUser struct {
