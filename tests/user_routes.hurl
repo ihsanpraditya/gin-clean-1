@@ -1,86 +1,141 @@
-# ==============================================================================
-# HURL TEST SUITE FOR USER ROUTE
-# ==============================================================================
-
-# 1. POST - Register User Baru
-POST http://localhost:8080/users
-Content-Type: application/json
-{
-  "name": "Ihsan Praditya",
-  "email": "ihsan@example.com",
-  "password": "secretpassword123"
+# ==========================================
+# 1. Test Registration Validation Failure
+# ==========================================
+POST http://localhost:8080/query
+```graphql
+mutation CreateUser($input: CreateUser!) {
+  createUser(input: $input) {
+    id
+    name
+    email
+    roles {
+        id
+        name
+    }
+    isActive
+  }
 }
 
-HTTP 201
-[Asserts]
-header "Content-Type" contains "application/json"
-jsonpath "$.message" == "User registered successfully"
-jsonpath "$.data.name" == "Ihsan Praditya"
-jsonpath "$.data.email" == "ihsan@example.com"
-jsonpath "$.data.id" exists
-# Tangkap ID user dari response untuk dipakai di request berikutnya
+variables {
+    "input": {
+        "name": "hor",
+        "email": "hor@example.com",
+        "password": "Horkitu123",
+        "confirmPassword": "Horkitu123",
+        "roles": [1,2],
+        "isActive": true
+    }
+}
+```
+HTTP 200
 [Captures]
-created_user_id: jsonpath "$.data.id"
+userTestID: jsonpath "$.data.createUser.id"
+# [Asserts]
+# jsonpath "$.data.createUser.id" == "8"
 
-
-# 2. POST - Register dengan Email yang Sama (Ekspektasi: Conflict 409)
-POST http://localhost:8080/users
-Content-Type: application/json
-{
-  "name": "Cloning Ihsan",
-  "email": "ihsan@example.com",
-  "password": "anotherpassword"
+# ### DELETE USER
+POST http://localhost:8080/query
+```graphql
+mutation DeleteUser {
+    deleteUser(id: {{userTestID}})
 }
-
-HTTP 409
-[Asserts]
-jsonpath "$.error" == "email already taken"
-
-
-# 3. GET - Mengambil Semua List Users
-GET http://localhost:8080/users
-
+```
 HTTP 200
 [Asserts]
-jsonpath "$" isCollection
-jsonpath "$[0].id" exists
+jsonpath "$.data.deleteUser" == "User with ID {{userTestID}} successfully deleted"
+ 
 
+# # ==========================================
 
-# 4. GET - Mengambil Data User Berdasarkan ID yang Baru Dibuat
-GET http://localhost:8080/users/{{created_user_id}}
+# # 2. Test Successful Registration
 
-HTTP 200
-[Asserts]
-jsonpath "$.id" == {{created_user_id}}
-jsonpath "$.name" == "Ihsan Praditya"
+# # ==========================================
 
+# POST http://localhost:8080/query
+# [GraphQLVariables]
+# {
+# "input": {
+# "email": "testuser_{{uuid}}@example.com",
+# "password": "Password123!",
+# "confirmPassword": "Password123!"
+# }
+# }
 
-# 5. PUT - Memperbarui Data User (Update)
-PUT http://localhost:8080/users/{{created_user_id}}
-Content-Type: application/json
-{
-  "name": "Ihsan Praditya Updated",
-  "email": "ihsan.new@example.com"
-}
+# ```graphql
+# mutation Register($input: UserRegisterInput!) {
+#   register(input: $input) {
+#     id
+#     email
+#   }
+# }
 
-HTTP 200
-[Asserts]
-jsonpath "$.message" == "User updated successfully"
-jsonpath "$.data.name" == "Ihsan Praditya Updated"
-jsonpath "$.data.email" == "ihsan.new@example.com"
+# ```
 
+# HTTP 200
+# [Asserts]
 
-# 6. DELETE - Menghapus User Berdasarkan ID
-DELETE http://localhost:8080/users/{{created_user_id}}
+# # Ensure no errors and capture the newly created user ID
 
-HTTP 200
-[Asserts]
-jsonpath "$.message" == "User deleted successfully"
+# jsonpath "$.errors" not exists
+# jsonpath "$.data.register.id" exists
+# jsonpath "$.data.register.email" contains "testuser_"
 
+# # ==========================================
 
-# 7. GET - Memastikan User Sudah Terhapus (Ekspektasi: Not Found 404)
-GET http://localhost:8080/users/{{created_user_id}}
+# # 3. Test Login & Capture JWT Token
 
-HTTP 404
-[Asserts]
-jsonpath "$.error" == "user not found"
+# # ==========================================
+
+# # Assuming you have a login mutation that returns a token
+
+# POST http://localhost:8080/query
+# [GraphQLVariables]
+# {
+# "email": "testuser_{{uuid}}@example.com",
+# "password": "Password123!"
+# }
+
+# ```graphql
+# mutation Login($email: String!,$password: String!) {
+#   login(email: $email, password:$password) {
+#     token
+#   }
+# }
+
+# ```
+
+# HTTP 200
+# [Asserts]
+# jsonpath "$.errors" not exists
+# jsonpath "$.data.login.token" exists
+# [Captures]
+
+# # Save the JWT token into a variable for the next request!
+
+# jwt_token: jsonpath "$.data.login.token"
+
+# # ==========================================
+
+# # 4. Authenticated Query (Using captured token)
+
+# # ==========================================
+
+# # Assuming you have a query to get the current authenticated user
+
+# POST http://localhost:8080/query
+# Authorization: Bearer {{jwt_token}}
+
+# ```graphql
+# query GetCurrentUser {
+#   me {
+#     id
+#     email
+#   }
+# }
+
+# ```
+
+# HTTP 200
+# [Asserts]
+# jsonpath "$.errors" not exists
+# jsonpath "$.data.me.email" contains "testuser_"

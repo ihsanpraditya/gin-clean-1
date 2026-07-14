@@ -49,10 +49,13 @@ query {
 }
 
 mutation {
-  register(input: {
+    createUser(input: {
     name: "Ihsan",
     email: "ihsan@example.com"
-    password: "islam123"
+    password: "islam123",
+    confirmPassword: "islam123",
+    roles: [1,2],
+    isActive: true
   }) {
       id
       name
