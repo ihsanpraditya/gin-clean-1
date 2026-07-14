@@ -2,6 +2,8 @@
 # 1. Test Registration Validation Failure
 # ==========================================
 POST http://localhost:8080/query
+[Options]
+variable: initialEmail=h123@example.com
 ```graphql
 mutation CreateUser($input: CreateUser!) {
   createUser(input: $input) {
@@ -19,7 +21,7 @@ mutation CreateUser($input: CreateUser!) {
 variables {
     "input": {
         "name": "hor",
-        "email": "hor@example.com",
+        "email": "{{initialEmail}}",
         "password": "Horkitu123",
         "confirmPassword": "Horkitu123",
         "roles": [1,2],
@@ -30,55 +32,46 @@ variables {
 HTTP 200
 [Captures]
 userTestID: jsonpath "$.data.createUser.id"
-# [Asserts]
-# jsonpath "$.data.createUser.id" == "8"
+[Asserts]
+jsonpath "$.data.createUser.name" == "hor"
+jsonpath "$.data.createUser.email" == "{{initialEmail}}"
 
-# ### DELETE USER
+# =============== UPDATE
 POST http://localhost:8080/query
+[Options]
+variable: newEmail=h456@example.com
 ```graphql
-mutation DeleteUser {
-    deleteUser(id: {{userTestID}})
+mutation UpdateUser($input: UpdateUser!) {
+  updateUser(id:{{userTestID}}, input: $input) {
+    id
+    name
+    email
+    roles {
+        id
+        name
+    }
+    isActive
+  }
+}
+
+variables {
+    "input": {
+        "name": "horkitu",
+        "email": "{{newEmail}}",
+        "password": "Horkitu123",
+        "confirmPassword": "Horkitu123",
+        "roles": [1,2],
+        "isActive": false
+    }
 }
 ```
 HTTP 200
 [Asserts]
-jsonpath "$.data.deleteUser" == "User with ID {{userTestID}} successfully deleted"
- 
+jsonpath "$.data.updateUser.name" == "horkitu"
+jsonpath "$.data.updateUser.email" != "{{initialEmail}}"
+jsonpath "$.data.updateUser.email" == "{{newEmail}}"
+jsonpath "$.data.updateUser.isActive" == false
 
-# # ==========================================
-
-# # 2. Test Successful Registration
-
-# # ==========================================
-
-# POST http://localhost:8080/query
-# [GraphQLVariables]
-# {
-# "input": {
-# "email": "testuser_{{uuid}}@example.com",
-# "password": "Password123!",
-# "confirmPassword": "Password123!"
-# }
-# }
-
-# ```graphql
-# mutation Register($input: UserRegisterInput!) {
-#   register(input: $input) {
-#     id
-#     email
-#   }
-# }
-
-# ```
-
-# HTTP 200
-# [Asserts]
-
-# # Ensure no errors and capture the newly created user ID
-
-# jsonpath "$.errors" not exists
-# jsonpath "$.data.register.id" exists
-# jsonpath "$.data.register.email" contains "testuser_"
 
 # # ==========================================
 
@@ -139,3 +132,14 @@ jsonpath "$.data.deleteUser" == "User with ID {{userTestID}} successfully delete
 # [Asserts]
 # jsonpath "$.errors" not exists
 # jsonpath "$.data.me.email" contains "testuser_"
+
+# =============== DELETE USER
+POST http://localhost:8080/query
+```graphql
+mutation DeleteUser {
+    deleteUser(id: {{userTestID}})
+}
+```
+HTTP 200
+[Asserts]
+jsonpath "$.data.deleteUser" == "User with ID {{userTestID}} successfully deleted"
