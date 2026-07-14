@@ -33,6 +33,7 @@ type ResolverRoot interface {
 	Query() QueryResolver
 	Role() RoleResolver
 	User() UserResolver
+	CreateUser() CreateUserResolver
 	UpdateUser() UpdateUserResolver
 }
 
@@ -104,6 +105,9 @@ type UserResolver interface {
 	ID(ctx context.Context, obj *dto.User) (string, error)
 }
 
+type CreateUserResolver interface {
+	Roles(ctx context.Context, obj *dto.CreateUser, data []string) error
+}
 type UpdateUserResolver interface {
 	Roles(ctx context.Context, obj *dto.UpdateUser, data []string) error
 }
@@ -2632,7 +2636,7 @@ func (ec *executionContext) unmarshalInputCreateUser(ctx context.Context, obj an
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "email", "password", "confirmPassword"}
+	fieldsInOrder := [...]string{"name", "email", "password", "confirmPassword", "roles", "isActive"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -2667,6 +2671,22 @@ func (ec *executionContext) unmarshalInputCreateUser(ctx context.Context, obj an
 				return it, err
 			}
 			it.ConfirmPassword = data
+		case "roles":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roles"))
+			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			if err = ec.Resolvers.CreateUser().Roles(ctx, &it, data); err != nil {
+				return it, err
+			}
+		case "isActive":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isActive"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsActive = data
 		}
 	}
 	return it, nil

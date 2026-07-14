@@ -57,9 +57,11 @@ func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUser) (dt
 		IsActive: input.IsActive,
 	}
 	
-	newUser.Roles = make([]model.Role, len(*input.Roles))
-	for i, roleID := range *input.Roles {
-		newUser.Roles[i] = model.Role{ID: roleID}
+	if input.Roles != nil {
+		newUser.Roles = make([]model.Role, len(*input.Roles))
+		for i, roleID := range *input.Roles {
+			newUser.Roles[i] = model.Role{ID: roleID}
+		}
 	}
 
 	if err := s.repo.Create(ctx, newUser); err != nil {
@@ -115,9 +117,11 @@ func (s *UserService) UpdateUser(ctx context.Context, id uint, input dto.UpdateU
 	user.Email = input.Email
 	user.IsActive = input.IsActive
 
-	user.Roles = make([]model.Role, len(*input.Roles))
-	for i, roleID := range *input.Roles {
-		user.Roles[i] = model.Role{ID: roleID}
+	if input.Roles != nil {
+		user.Roles = make([]model.Role, len(*input.Roles))
+		for i, roleID := range *input.Roles {
+			user.Roles[i] = model.Role{ID: roleID}
+		}
 	}
 
 	if input.Password != "" {

@@ -103,25 +103,52 @@ func (r *userResolver) ID(ctx context.Context, obj *dto.User) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
+func (r *createUserResolver) Roles(ctx context.Context, obj *dto.CreateUser, data []string) error {
+	if obj == nil {
+		return nil
+	}
+
+	roles := make([]uint, len(data))
+	for i, roleIDStr := range data {
+		roleID, err := strconv.ParseUint(roleIDStr, 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid role id format: %s", roleIDStr)
+		}
+		roles[i] = uint(roleID)
+	}
+	obj.Roles = &roles
+	return nil
+}
+
 // Roles is the resolver for the roles field.
 func (r *updateUserResolver) Roles(ctx context.Context, obj *dto.UpdateUser, data []string) error {
-	if obj == nil || obj.Roles == nil {
-		return nil 
+	if obj == nil {
+		return nil
 	}
-	
-	for _, roleID := range *obj.Roles {
-		strconv.FormatUint(uint64(roleID), 10)
+
+	roles := make([]uint, len(data))
+	for i, roleIDStr := range data {
+		roleID, err := strconv.ParseUint(roleIDStr, 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid role id format: %s", roleIDStr)
+		}
+		roles[i] = uint(roleID)
 	}
-	return  nil
+	obj.Roles = &roles
+	return nil
 }
 
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
+
+// CreateUser returns CreateUserResolver implementation.
+func (r *Resolver) CreateUser() CreateUserResolver { return &createUserResolver{r} }
 
 // UpdateUser returns UpdateUserResolver implementation.
 func (r *Resolver) UpdateUser() UpdateUserResolver { return &updateUserResolver{r} }
 
 type (
 	userResolver       struct{ *Resolver }
+	createUserResolver struct{ *Resolver }
 	updateUserResolver struct{ *Resolver }
 )
