@@ -8,5 +8,6 @@ import (
 type Resolver struct {
 	RoleSvc *service.RoleService
 	UserSvc *service.UserService
+	AuthSvc *service.AuthService
 	Validator *validator.Validate
 }

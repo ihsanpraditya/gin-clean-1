@@ -3,10 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"time"
-	"os"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/ihsanpraditya/gin-clean-1/internal/model"
 	"github.com/ihsanpraditya/gin-clean-1/internal/dto"
 	"github.com/ihsanpraditya/gin-clean-1/internal/repository"
@@ -16,19 +13,14 @@ import (
 var (
 	ErrEmailTaken         = errors.New("email already taken")
 	ErrUserNotFound       = errors.New("user not found")
-	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
 type UserService struct {
 	repo *repository.UserRepository
-	jwtSecret []byte
 }
 
 func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{
-		repo:      repo,
-		jwtSecret: []byte(os.Getenv("JWT_KEY")),
-	}
+	return &UserService{repo: repo}
 }
 
 func (s *UserService) GetUserByID(ctx context.Context, id uint) (dto.User, error) {
@@ -69,30 +61,6 @@ func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUser) (dt
 	}
 
 	return toUserDTO(newUser), nil
-}
-
-func (s *UserService) Login(ctx context.Context, email, password string) (string, dto.User, error) {
-	user, err := s.repo.FindByEmail(ctx, email)
-	if err != nil {
-		return "", dto.User{}, ErrInvalidCredentials
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
-		return "", dto.User{}, ErrInvalidCredentials
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(),
-	})
-
-	tokenString, err := token.SignedString(s.jwtSecret)
-	if err != nil {
-		return "", dto.User{}, err
-	}
-
-	return tokenString, toUserDTO(user), nil
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]dto.User, error) {

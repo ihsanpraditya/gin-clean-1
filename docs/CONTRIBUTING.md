@@ -51,5 +51,6 @@ go run github.com/99designs/gqlgen generate
 gorm gen -i ./internal/model/ -o ./internal/query/
 ```
 4. Define its graphql schema in `graph/`, follow instructions above.
-5. Add/edit service in `internal/service/` folder.
-6. Add/edit repository in `internal/repository/` folder.
+5. Adjust its service in `internal/service/` folder.
+6. Adjust its repository in `internal/repository/` folder.
+7. Adjust its resolver in `graphql/resolver.go` and `internal/router/router.go`.

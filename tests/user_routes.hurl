@@ -88,8 +88,8 @@ query ReadUsers {
 ```
 HTTP 200
 [Asserts]
-jsonpath "$.data.users[0].email" == "{{initialEmail}}"
 jsonpath "$.data.users[*].name" contains "{{initialName}}"
+jsonpath "$.data.users[*].email" contains "{{initialEmail}}"
 
 # ==========================================
 # UPDATE

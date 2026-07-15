@@ -13,7 +13,7 @@ import (
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*dto.LoginResponse, error) {
-	token, user, err := r.UserSvc.Login(ctx, email, password)
+	token, user, err := r.AuthSvc.Login(ctx, email, password)
 	if err != nil {
 		return nil, err
 	}
