@@ -8,6 +8,7 @@ extend type Mutation {
   createUser(input: CreateUser!): User! # @can(resource: "user", action: "create")
   updateUser(id: ID!, input: UpdateUser!): User! # @can(resource: "user", action: "update")
   deleteUser(id: ID!): String! # @can(resource: "user", action: "delete")
+  deleteUsers(ids: [ID!]!): String! # @can(resource: "user", action: "delete")
 }
 
 type User {

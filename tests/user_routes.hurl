@@ -1,12 +1,24 @@
 # ==========================================
-# 1. Test Registration Validation Failure
+# CREATE
 # ==========================================
 POST http://localhost:8080/query
 [Options]
+variable: initialName=hor
 variable: initialEmail=h123@example.com
 ```graphql
-mutation CreateUser($input: CreateUser!) {
-  createUser(input: $input) {
+mutation CreateUsers($input1: CreateUser!, $input2: CreateUser!) {
+  firstUser: createUser(input: $input1) {
+    id
+    name
+    email
+    roles {
+        id
+        name
+    }
+    isActive
+  }
+  
+  secondUser: createUser(input: $input2) {
     id
     name
     email
@@ -19,9 +31,17 @@ mutation CreateUser($input: CreateUser!) {
 }
 
 variables {
-    "input": {
-        "name": "hor",
+    "input1": {
+        "name": "{{initialName}}",
         "email": "{{initialEmail}}",
+        "password": "Horkitu123",
+        "confirmPassword": "Horkitu123",
+        "roles": [1,2],
+        "isActive": true
+    },
+    "input2": {
+        "name": "secondUser",
+        "email": "second@example.com",
         "password": "Horkitu123",
         "confirmPassword": "Horkitu123",
         "roles": [1,2],
@@ -31,12 +51,49 @@ variables {
 ```
 HTTP 200
 [Captures]
-userTestID: jsonpath "$.data.createUser.id"
+userTestID: jsonpath "$.data.firstUser.id"
+secondUserTestID: jsonpath "$.data.secondUser.id"
 [Asserts]
-jsonpath "$.data.createUser.name" == "hor"
-jsonpath "$.data.createUser.email" == "{{initialEmail}}"
+jsonpath "$.data.firstUser.name" == "{{initialName}}"
+jsonpath "$.data.firstUser.email" == "{{initialEmail}}"
 
-# =============== UPDATE
+# ==========================================
+# READ ONE
+# ==========================================
+POST http://localhost:8080/query
+```graphql
+query ReadUser {
+    user(id: {{userTestID}}) {
+        name
+        email
+    }
+}
+```
+HTTP 200
+[Asserts]
+jsonpath "$.data.user.name" == "{{initialName}}"
+jsonpath "$.data.user.email" == "{{initialEmail}}"
+
+# ==========================================
+# READ MANY
+# ==========================================
+POST http://localhost:8080/query
+```graphql
+query ReadUsers {
+    users {
+        name
+        email
+    }
+}
+```
+HTTP 200
+[Asserts]
+jsonpath "$.data.users[0].email" == "{{initialEmail}}"
+jsonpath "$.data.users[*].name" contains "{{initialName}}"
+
+# ==========================================
+# UPDATE
+# ==========================================
 POST http://localhost:8080/query
 [Options]
 variable: newEmail=h456@example.com
@@ -72,68 +129,9 @@ jsonpath "$.data.updateUser.email" != "{{initialEmail}}"
 jsonpath "$.data.updateUser.email" == "{{newEmail}}"
 jsonpath "$.data.updateUser.isActive" == false
 
-
-# # ==========================================
-
-# # 3. Test Login & Capture JWT Token
-
-# # ==========================================
-
-# # Assuming you have a login mutation that returns a token
-
-# POST http://localhost:8080/query
-# [GraphQLVariables]
-# {
-# "email": "testuser_{{uuid}}@example.com",
-# "password": "Password123!"
-# }
-
-# ```graphql
-# mutation Login($email: String!,$password: String!) {
-#   login(email: $email, password:$password) {
-#     token
-#   }
-# }
-
-# ```
-
-# HTTP 200
-# [Asserts]
-# jsonpath "$.errors" not exists
-# jsonpath "$.data.login.token" exists
-# [Captures]
-
-# # Save the JWT token into a variable for the next request!
-
-# jwt_token: jsonpath "$.data.login.token"
-
-# # ==========================================
-
-# # 4. Authenticated Query (Using captured token)
-
-# # ==========================================
-
-# # Assuming you have a query to get the current authenticated user
-
-# POST http://localhost:8080/query
-# Authorization: Bearer {{jwt_token}}
-
-# ```graphql
-# query GetCurrentUser {
-#   me {
-#     id
-#     email
-#   }
-# }
-
-# ```
-
-# HTTP 200
-# [Asserts]
-# jsonpath "$.errors" not exists
-# jsonpath "$.data.me.email" contains "testuser_"
-
-# =============== DELETE USER
+# ==========================================
+# DELETE ONE
+# ==========================================
 POST http://localhost:8080/query
 ```graphql
 mutation DeleteUser {
@@ -143,3 +141,16 @@ mutation DeleteUser {
 HTTP 200
 [Asserts]
 jsonpath "$.data.deleteUser" == "User with ID {{userTestID}} successfully deleted"
+
+# ==========================================
+# DELETE MANY
+# ==========================================
+POST http://localhost:8080/query
+```graphql
+mutation DeleteUsers {
+    deleteUsers(ids: [{{secondUserTestID}}])
+}
+```
+HTTP 200
+[Asserts]
+jsonpath "$.data.deleteUsers" == "Users with IDs [{{secondUserTestID}}] successfully deleted"

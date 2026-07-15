@@ -88,3 +88,12 @@ func (r *UserRepository) Delete(ctx context.Context, id uint) error {
 		Where(query.User.ID.Eq(id)).
 		Delete(&model.User{}).Error
 }
+
+func (r *UserRepository) DeleteUsers(ctx context.Context, ids []uint) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	return r.db.WithContext(ctx).
+		Where(query.User.ID.In(ids...)).
+		Delete(&model.User{}).Error
+}

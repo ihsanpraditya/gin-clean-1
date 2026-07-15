@@ -67,6 +67,26 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (string, e
 	return fmt.Sprintf("User with ID %s successfully deleted", id), nil
 }
 
+// DeleteUsers is the resolver for the deleteUsers field.
+func (r *mutationResolver) DeleteUsers(ctx context.Context, ids []string) (string, error) {
+	idsUint := make([]uint, len(ids))
+	for i, id := range ids {
+		idUint, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			return "", fmt.Errorf("invalid user id format")
+		}
+		idsUint[i] = uint(idUint)
+	}
+
+
+	err := r.UserSvc.DeleteUsers(ctx, idsUint)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Users with IDs %v successfully deleted", ids), nil
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*dto.User, error) {
 	idUint, err := strconv.ParseUint(id, 10, 64)
@@ -103,6 +123,7 @@ func (r *userResolver) ID(ctx context.Context, obj *dto.User) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
+// Roles is the resolver for the roles field.
 func (r *createUserResolver) Roles(ctx context.Context, obj *dto.CreateUser, data []string) error {
 	if obj == nil {
 		return nil

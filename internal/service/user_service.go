@@ -144,6 +144,11 @@ func (s *UserService) DeleteUser(ctx context.Context, id uint) error {
 	return s.repo.Delete(ctx, id)
 }
 
+func (s *UserService) DeleteUsers(ctx context.Context, ids []uint) error {
+	return s.repo.DeleteUsers(ctx, ids)
+}
+
+
 func toUserDTO(u *model.User) dto.User {
 	rolesDto := make([]dto.Role, len(u.Roles))
 	for i := range u.Roles {
