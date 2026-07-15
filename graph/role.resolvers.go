@@ -15,17 +15,38 @@ import (
 
 // CreateRole is the resolver for the createRole field.
 func (r *mutationResolver) CreateRole(ctx context.Context, name string) (*dto.Role, error) {
-	panic(fmt.Errorf("not implemented: CreateRole - createRole"))
+	newRole, err := r.RoleSvc.CreateRole(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	return &newRole, nil
 }
 
 // UpdateRole is the resolver for the updateRole field.
 func (r *mutationResolver) UpdateRole(ctx context.Context, id string, name string) (*dto.Role, error) {
-	panic(fmt.Errorf("not implemented: UpdateRole - updateRole"))
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid role id format")
+	}
+	updatedRole, err := r.RoleSvc.UpdateRole(ctx, uint(idUint), name)
+	if err != nil {
+		return nil, err
+	}
+	return &updatedRole, nil
 }
 
 // DeleteRole is the resolver for the deleteRole field.
 func (r *mutationResolver) DeleteRole(ctx context.Context, id string) (string, error) {
-	panic(fmt.Errorf("not implemented: DeleteRole - deleteRole"))
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("invalid role id format")
+	}
+	err = r.RoleSvc.DeleteRole(ctx, uint(idUint))
+	if err != nil {
+		return "", err
+	}
+	
+	return fmt.Sprintf("Role with ID %s successfully deleted", id), nil
 }
 
 // Role is the resolver for the role field.
@@ -44,7 +65,17 @@ func (r *queryResolver) Role(ctx context.Context, id string) (*dto.Role, error) 
 
 // Roles is the resolver for the roles field.
 func (r *queryResolver) Roles(ctx context.Context) ([]*dto.Role, error) {
-	panic(fmt.Errorf("not implemented: Roles - roles"))
+	roles, err := r.RoleSvc.GetAllRoles(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rolesPointer := make([]*dto.Role, len(roles))
+	for r := range roles {
+		rolesPointer[r] = &roles[r]
+	}
+	
+	return rolesPointer, nil
 }
 
 // ID is the resolver for the id field.
