@@ -1,7 +1,21 @@
+# login, in case of super_admin has the role in policy.csv
+POST http://localhost:8080/query
+```graphql
+mutation {
+  login(email: "superadmin@example.com", password: "password123") {
+    token
+  }
+}
+```
+HTTP 200
+[Captures]
+token: jsonpath "$.data.login.token"
+
 # ==========================================
 # CREATE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 [Options]
 variable: firstRole=hor
 variable: secondRole=sec
@@ -29,6 +43,7 @@ jsonpath "$.data.firstRole.name" == "{{firstRole}}"
 # READ ONE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 query ReadRole {
     role(id: {{roleTestID}}) {
@@ -44,6 +59,7 @@ jsonpath "$.data.role.name" == "{{firstRole}}"
 # READ MANY
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 query ReadRoles {
     roles {
@@ -59,6 +75,7 @@ jsonpath "$.data.roles[*].name" contains "{{firstRole}}"
 # UPDATE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 [Options]
 variable: newRoleName=petok
 ```graphql
@@ -77,6 +94,7 @@ jsonpath "$.data.updateRole.name" == "{{newRoleName}}"
 # DELETE ONE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 mutation DeleteRole {
     firstRole: deleteRole(id: {{roleTestID}})

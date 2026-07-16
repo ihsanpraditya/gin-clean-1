@@ -943,7 +943,30 @@ func (ec *executionContext) _Mutation_createRole(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateRole(ctx, fc.Args["name"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "roles")
+				if err != nil {
+					var zeroVal *dto.Role
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "create")
+				if err != nil {
+					var zeroVal *dto.Role
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal *dto.Role
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.Role) graphql.Marshaler {
 			return ec.marshalNRole2ᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐRole(ctx, selections, v)
 		},
@@ -987,7 +1010,30 @@ func (ec *executionContext) _Mutation_updateRole(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateRole(ctx, fc.Args["id"].(string), fc.Args["name"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "roles")
+				if err != nil {
+					var zeroVal *dto.Role
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "update")
+				if err != nil {
+					var zeroVal *dto.Role
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal *dto.Role
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.Role) graphql.Marshaler {
 			return ec.marshalNRole2ᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐRole(ctx, selections, v)
 		},
@@ -1031,7 +1077,30 @@ func (ec *executionContext) _Mutation_deleteRole(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteRole(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "roles")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "delete")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return ec.marshalNString2string(ctx, selections, v)
 		},
@@ -1075,7 +1144,30 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(dto.CreateUser))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "users")
+				if err != nil {
+					var zeroVal *dto.User
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "create")
+				if err != nil {
+					var zeroVal *dto.User
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal *dto.User
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.User) graphql.Marshaler {
 			return ec.marshalNUser2ᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐUser(ctx, selections, v)
 		},
@@ -1119,7 +1211,30 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateUser(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.UpdateUser))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "users")
+				if err != nil {
+					var zeroVal *dto.User
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "update")
+				if err != nil {
+					var zeroVal *dto.User
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal *dto.User
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.User) graphql.Marshaler {
 			return ec.marshalNUser2ᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐUser(ctx, selections, v)
 		},
@@ -1163,7 +1278,30 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "users")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "delete")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return ec.marshalNString2string(ctx, selections, v)
 		},
@@ -1207,7 +1345,30 @@ func (ec *executionContext) _Mutation_deleteUsers(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DeleteUsers(ctx, fc.Args["ids"].([]string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "users")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "delete")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return ec.marshalNString2string(ctx, selections, v)
 		},
@@ -1251,7 +1412,30 @@ func (ec *executionContext) _Query_role(ctx context.Context, field graphql.Colle
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().Role(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "roles")
+				if err != nil {
+					var zeroVal *dto.Role
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "read")
+				if err != nil {
+					var zeroVal *dto.Role
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal *dto.Role
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.Role) graphql.Marshaler {
 			return ec.marshalORole2ᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐRole(ctx, selections, v)
 		},
@@ -1294,7 +1478,30 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Roles(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "roles")
+				if err != nil {
+					var zeroVal []*dto.Role
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "read")
+				if err != nil {
+					var zeroVal []*dto.Role
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal []*dto.Role
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*dto.Role) graphql.Marshaler {
 			return ec.marshalNRole2ᚕᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐRoleᚄ(ctx, selections, v)
 		},
@@ -1327,7 +1534,30 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "users")
+				if err != nil {
+					var zeroVal *dto.User
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "read")
+				if err != nil {
+					var zeroVal *dto.User
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal *dto.User
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.User) graphql.Marshaler {
 			return ec.marshalOUser2ᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐUser(ctx, selections, v)
 		},
@@ -1370,7 +1600,30 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Users(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				resource, err := ec.unmarshalNString2string(ctx, "users")
+				if err != nil {
+					var zeroVal []*dto.User
+					return zeroVal, err
+				}
+				action, err := ec.unmarshalNString2string(ctx, "read")
+				if err != nil {
+					var zeroVal []*dto.User
+					return zeroVal, err
+				}
+				if ec.Directives.Can == nil {
+					var zeroVal []*dto.User
+					return zeroVal, errors.New("directive can is not implemented")
+				}
+				return ec.Directives.Can(ctx, nil, directive0, resource, action)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*dto.User) graphql.Marshaler {
 			return ec.marshalNUser2ᚕᚖgithubᚗcomᚋihsanpradityaᚋginᚑcleanᚑ1ᚋinternalᚋdtoᚐUserᚄ(ctx, selections, v)
 		},

@@ -78,7 +78,6 @@ func (r *mutationResolver) DeleteUsers(ctx context.Context, ids []string) (strin
 		idsUint[i] = uint(idUint)
 	}
 
-
 	err := r.UserSvc.DeleteUsers(ctx, idsUint)
 	if err != nil {
 		return "", err

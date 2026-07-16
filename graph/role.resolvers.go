@@ -45,7 +45,7 @@ func (r *mutationResolver) DeleteRole(ctx context.Context, id string) (string, e
 	if err != nil {
 		return "", err
 	}
-	
+
 	return fmt.Sprintf("Role with ID %s successfully deleted", id), nil
 }
 
@@ -74,7 +74,7 @@ func (r *queryResolver) Roles(ctx context.Context) ([]*dto.Role, error) {
 	for r := range roles {
 		rolesPointer[r] = &roles[r]
 	}
-	
+
 	return rolesPointer, nil
 }
 

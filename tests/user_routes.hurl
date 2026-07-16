@@ -1,7 +1,21 @@
+# login, in case of super_admin has the role in policy.csv
+POST http://localhost:8080/query
+```graphql
+mutation {
+  login(email: "superadmin@example.com", password: "password123") {
+    token
+  }
+}
+```
+HTTP 200
+[Captures]
+token: jsonpath "$.data.login.token"
+
 # ==========================================
 # CREATE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 [Options]
 variable: initialName=hor
 variable: initialEmail=h123@example.com
@@ -61,6 +75,7 @@ jsonpath "$.data.firstUser.email" == "{{initialEmail}}"
 # READ ONE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 query ReadUser {
     user(id: {{userTestID}}) {
@@ -78,6 +93,7 @@ jsonpath "$.data.user.email" == "{{initialEmail}}"
 # READ MANY
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 query ReadUsers {
     users {
@@ -95,6 +111,7 @@ jsonpath "$.data.users[*].email" contains "{{initialEmail}}"
 # UPDATE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 [Options]
 variable: newEmail=h456@example.com
 ```graphql
@@ -133,6 +150,7 @@ jsonpath "$.data.updateUser.isActive" == false
 # DELETE ONE
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 mutation DeleteUser {
     deleteUser(id: {{userTestID}})
@@ -146,6 +164,7 @@ jsonpath "$.data.deleteUser" == "User with ID {{userTestID}} successfully delete
 # DELETE MANY
 # ==========================================
 POST http://localhost:8080/query
+Authorization: Bearer {{token}}
 ```graphql
 mutation DeleteUsers {
     deleteUsers(ids: [{{secondUserTestID}}])

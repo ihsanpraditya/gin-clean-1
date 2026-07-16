@@ -1,14 +1,14 @@
 extend type Query {
-  user(id: ID!): User
-  users: [User!]!
+  user(id: ID!): User @can(resource: "users", action: "read")
+  users: [User!]! @can(resource: "users", action: "read")
 }
 
 # NOTE: The following mutations are commented out because they require authentication and authorization directives that are not implemented in this schema. Uncomment them when you have the necessary authentication and authorization logic in place.
 extend type Mutation {
-  createUser(input: CreateUser!): User! # @can(resource: "user", action: "create")
-  updateUser(id: ID!, input: UpdateUser!): User! # @can(resource: "user", action: "update")
-  deleteUser(id: ID!): String! # @can(resource: "user", action: "delete")
-  deleteUsers(ids: [ID!]!): String! # @can(resource: "user", action: "delete")
+  createUser(input: CreateUser!): User! @can(resource: "users", action: "create")
+  updateUser(id: ID!, input: UpdateUser!): User! @can(resource: "users", action: "update")
+  deleteUser(id: ID!): String! @can(resource: "users", action: "delete")
+  deleteUsers(ids: [ID!]!): String! @can(resource: "users", action: "delete")
 }
 
 type User {

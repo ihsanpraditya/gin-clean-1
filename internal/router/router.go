@@ -22,8 +22,9 @@ import (
 
 func SetupRouter(r *gin.Engine) {
 	userRepo := repository.NewUserRepository(database.DB)
-	userSvc := service.NewUserService(userRepo)
 	roleRepo := repository.NewRoleRepository(database.DB)
+	
+	userSvc := service.NewUserService(userRepo)
 	roleSvc := service.NewRoleService(roleRepo)
 	authSvc := service.NewAuthService(userRepo)
 	
@@ -57,8 +58,8 @@ func SetupRouter(r *gin.Engine) {
 	r.POST("/query", ginHandler(srv))
 }
 
+// ginHandler adalah fungsi jembatan agar handler standard http.Handler milik gqlgen cocok dengan Gin
 func ginHandler(h http.Handler) gin.HandlerFunc {
-	// ginHandler adalah fungsi jembatan agar handler standard http.Handler milik gqlgen cocok dengan Gin
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
 	}
